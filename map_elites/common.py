@@ -191,7 +191,7 @@ def cvt(k, dim, samples, cvt_use_cache=True):
 
     x = np.random.rand(samples, dim)
     k_means = KMeans(init='k-means++', n_clusters=k,
-                     n_init=1, n_jobs=-1, verbose=1)#,algorithm="full")
+                     n_init=1, verbose=1)#,algorithm="full")
     k_means.fit(x)
     __write_centroids(k_means.cluster_centers_)
 
@@ -217,6 +217,7 @@ def __save_archive(archive, gen):
             f.write(str(i) + ' ')
     filename = 'archive_' + str(gen) + '.dat'
     with open(filename, 'w') as f:
+        f.write(f'{len(archive.values())}\n')
         for k in archive.values():
             f.write(str(k.fitness) + ' ')
             write_array(k.centroid, f)

@@ -99,14 +99,18 @@ def compute(dim_map, dim_x, f,
 
     # main loop
     while (n_evals < max_evals):
+        log_file.write(f'Eval: {n_evals}\n')
         to_evaluate = []
         # random initialization
         if len(archive) <= params['random_init'] * n_niches:
             for i in range(0, params['random_init_batch']):
-                x = np.random.uniform(low=params['min'], high=params['max'], size=dim_x)
+                x = np.random.choice([1, 0], size=dim_x)
                 to_evaluate += [(x, f)]
+            log_file.write(f'Random init archive\n')
         else:  # variation/selection loop
             keys = list(archive.keys())
+            log_file.write(f'Keys: {keys}\n')
+            log_file.flush()
             # we select all the parents at the same time because randint is slow
             rand1 = np.random.randint(len(keys), size=params['batch_size'])
             rand2 = np.random.randint(len(keys), size=params['batch_size'])
@@ -115,11 +119,13 @@ def compute(dim_map, dim_x, f,
                 x = archive[keys[rand1[n]]]
                 y = archive[keys[rand2[n]]]
                 # copy & add variation
-                z = variation_operator(x.x, y.x, params)
+                z = variation_operator(x.x, y.x)
                 to_evaluate += [(z, f)]
         # evaluation of the fitness for to_evaluate
         s_list = cm.parallel_eval(__evaluate, to_evaluate, pool, params)
+        log_file.write(f'Finished eval\n')
         # natural selection
+        log_file.write(f'Adding to archive {len(s_list)}\n')
         for s in s_list:
             __add_to_archive(s, s.desc, archive, kdt)
         # count evals
