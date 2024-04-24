@@ -41,6 +41,7 @@
 import math
 import numpy as np
 import multiprocessing
+import os
 from pathlib import Path
 import sys
 import random
@@ -168,10 +169,12 @@ def __centroids_filename(k, dim):
     return 'centroids_' + str(k) + '_' + str(dim) + '.dat'
 
 
-def __write_centroids(centroids):
+def __write_centroids(centroids, log_dir=None):
     k = centroids.shape[0]
     dim = centroids.shape[1]
     filename = __centroids_filename(k, dim)
+    if log_dir is not None:
+        filename = os.path.join(log_dir, filename)
     with open(filename, 'w') as f:
         for p in centroids:
             for item in p:
@@ -179,7 +182,7 @@ def __write_centroids(centroids):
             f.write('\n')
 
 
-def cvt(k, dim, samples, cvt_use_cache=True):
+def cvt(k, dim, samples, cvt_use_cache=True, log_dir=None):
     # check if we have cached values
     fname = __centroids_filename(k, dim)
     if cvt_use_cache:
@@ -193,7 +196,7 @@ def cvt(k, dim, samples, cvt_use_cache=True):
     k_means = KMeans(init='k-means++', n_clusters=k,
                      n_init=1, verbose=1)#,algorithm="full")
     k_means.fit(x)
-    __write_centroids(k_means.cluster_centers_)
+    __write_centroids(k_means.cluster_centers_, log_dir=log_dir)
 
     return k_means.cluster_centers_
 

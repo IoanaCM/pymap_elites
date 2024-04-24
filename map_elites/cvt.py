@@ -40,6 +40,7 @@
 import math
 import numpy as np
 import multiprocessing
+import os
 
 # from scipy.spatial import cKDTree : TODO -- faster?
 from sklearn.neighbors import KDTree
@@ -75,6 +76,7 @@ def compute(dim_map, dim_x, f,
             n_niches=1000,
             max_evals=1e5,
             params=cm.default_params,
+            log_dir=None,
             log_file=None,
             variation_operator=cm.variation):
     """CVT MAP-Elites
@@ -89,7 +91,7 @@ def compute(dim_map, dim_x, f,
 
     # create the CVT
     c = cm.cvt(n_niches, dim_map,
-              params['cvt_samples'], params['cvt_use_cache'])
+              params['cvt_samples'], params['cvt_use_cache'], log_dir=log_dir)
     kdt = KDTree(c, leaf_size=30, metric='euclidean')
     cm.__write_centroids(c)
 
