@@ -53,13 +53,13 @@ default_params = \
         # more of this -> higher-quality CVT
         "cvt_samples": 25000,
         # we evaluate in batches to paralleliez
-        "batch_size": 100,
+        "batch_size": 20,
         # proportion of niches to be filled before starting
-        "random_init": 0.1,
+        "random_init": 0.01,
         # batch for random initialization
-        "random_init_batch": 100,
+        "random_init_batch": 20,
         # when to write results (one generation = one batch)
-        "dump_period": 10000,
+        "dump_period": 20,
         # do we use several cores?
         "parallel": True,
         # do we cache the result of CVT and reuse?

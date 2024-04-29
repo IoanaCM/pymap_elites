@@ -86,7 +86,7 @@ def compute(dim_map, dim_x, f,
 
     """
     # setup the parallel processing pool
-    pool = multiprocessing.Pool(15)
+    pool = multiprocessing.Pool(min(params['batch_size'], 20))
 
     # create the CVT
     c = cm.cvt(n_niches, dim_map,
