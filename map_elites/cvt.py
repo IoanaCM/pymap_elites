@@ -39,7 +39,7 @@
 
 import math
 import numpy as np
-import multiprocessing
+import torch.multiprocessing as multiprocessing
 import os
 
 # from scipy.spatial import cKDTree : TODO -- faster?
@@ -86,8 +86,7 @@ def compute(dim_map, dim_x, f,
 
     """
     # setup the parallel processing pool
-    num_cores = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(num_cores)
+    pool = multiprocessing.Pool(15)
 
     # create the CVT
     c = cm.cvt(n_niches, dim_map,
