@@ -214,11 +214,13 @@ def parallel_eval(evaluate_function, to_evaluate, pool, params):
 
 # format: fitness, centroid, desc, genome \n
 # fitness, centroid, desc and x are vectors
-def __save_archive(archive, gen):
+def __save_archive(archive, gen, log_dir=None):
     def write_array(a, f):
         for i in a:
             f.write(str(i) + ' ')
     filename = 'archive_' + str(gen) + '.dat'
+    if log_dir is not None:
+        filename = os.path.join(log_dir, filename)
     with open(filename, 'w') as f:
         f.write(f'{len(archive.values())}\n')
         for k in archive.values():

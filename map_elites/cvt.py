@@ -87,6 +87,13 @@ def compute(dim_map, dim_x, f,
     """
     # setup the parallel processing pool
     pool = multiprocessing.Pool(min(params['batch_size'], 100))
+    
+    # create log folder
+    if log_dir is not None:
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, log_file)
+    
+    log_file = open(log_file, 'w')
 
     # create the CVT
     c = cm.cvt(n_niches, dim_map,
@@ -136,7 +143,7 @@ def compute(dim_map, dim_x, f,
         # write archive
         if b_evals >= params['dump_period'] and params['dump_period'] != -1:
             print("[{}/{}]".format(n_evals, int(max_evals)), end=" ", flush=True)
-            cm.__save_archive(archive, n_evals)
+            cm.__save_archive(archive, n_evals, log_dir)
             b_evals = 0
         # write log
         if log_file != None:
@@ -145,5 +152,5 @@ def compute(dim_map, dim_x, f,
                     fit_list.max(), np.mean(fit_list), np.median(fit_list),
                     np.percentile(fit_list, 5), np.percentile(fit_list, 95)))
             log_file.flush()
-    cm.__save_archive(archive, n_evals)
+    cm.__save_archive(archive, n_evals, log_dir)
     return archive
