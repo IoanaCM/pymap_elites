@@ -127,7 +127,7 @@ def compute(dim_map, dim_x, f,
                 x = archive[keys[rand1[n]]]
                 y = archive[keys[rand2[n]]]
                 # copy & add variation
-                z = variation_operator(x.x, y.x)
+                z = variation_operator(x.x, y.x, params)
                 to_evaluate += [(z, f)]
         # evaluation of the fitness for to_evaluate
         s_list = cm.parallel_eval(__evaluate, to_evaluate, pool, params)
