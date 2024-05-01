@@ -135,7 +135,8 @@ def compute(dim_map, dim_x, f,
         # natural selection
         log_file.write(f'Adding to archive {len(s_list)}\n')
         for s in s_list:
-            __add_to_archive(s, s.desc, archive, kdt)
+            if s.desc is not None and s.fitness is not None:
+                __add_to_archive(s, s.desc, archive, kdt)
         # count evals
         n_evals += len(to_evaluate)
         b_evals += len(to_evaluate)
