@@ -133,8 +133,8 @@ def sbx(x, y, params):
                 beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
             c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
 
-            c1 = min(max(c1, xl), xu)
-            c2 = min(max(c2, xl), xu)
+            c1 = int(np.round(min(max(c1, xl), xu)))
+            c2 = int(np.round(min(max(c2, xl), xu)))
 
             if r2[i] <= 0.5:
                 z[i] = c2
