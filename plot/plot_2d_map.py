@@ -175,6 +175,7 @@ def plot_cvt(ax, centroids, fit, desc, x,dim1,dim2, min_fit, max_fit):
             print(k, end=" ", flush=True)
     fit_reshaped = fit.reshape((len(fit),))
     sc = ax.scatter(desc[:,0], desc[:,1], c=fit_reshaped, cmap=my_cmap, s=10, zorder=0)
+    return sc
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -202,6 +203,7 @@ if __name__ == "__main__":
     fig, axes = plt.subplots(1, 1, figsize=(10, 10), facecolor='white', edgecolor='white')
     axes.set_xlim(0, 1)
     axes.set_ylim(0, 1)
-    plot_cvt(axes, centroids, fit, beh, x,2,4, min_fit, max_fit)
+    sc = plot_cvt(axes, centroids, fit, beh, x,2,4, min_fit, max_fit)
+    fig.colorbar(sc)
     fig.savefig('cvt.pdf')
     fig.savefig('cvt.png')
