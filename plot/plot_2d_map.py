@@ -205,5 +205,6 @@ if __name__ == "__main__":
     axes.set_ylim(0, 1)
     sc = plot_cvt(axes, centroids, fit, beh, x,2,4, min_fit, max_fit)
     fig.colorbar(sc)
+    fig.suptitle(f'150-Crossover with Flip - Max fit: {max_fit[0]} - Min fit: {min_fit[0]}', fontsize=20)
     fig.savefig('cvt.pdf')
     fig.savefig('cvt.png')
