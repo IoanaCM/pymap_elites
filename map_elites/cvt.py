@@ -111,8 +111,11 @@ def compute(dim_map, dim_x, f,
         to_evaluate = []
         # random initialization
         if len(archive) <= params['random_init'] * n_niches:
-            for i in range(0, params['random_init_batch']):
-                x = np.random.choice([1, 0], size=dim_x)
+            for _ in range(0, params['random_init_batch']):
+                n = np.random.randint(1, dim_x)
+                idx = np.sort(np.random.choice(range(0, dim_x), n, replace=False))
+                x = np.zeros(shape=dim_x, dtype=int)
+                x[idx] = 1
                 to_evaluate += [(x, f)]
             log_file.write(f'Random init archive\n')
         else:  # variation/selection loop
