@@ -48,6 +48,8 @@ import random
 from collections import defaultdict
 from sklearn.cluster import KMeans
 
+if __name__ == '__main__':
+    torch.multiprocessing.set_start_method('spawn')
 default_params = \
     {
         # more of this -> higher-quality CVT
