@@ -40,7 +40,7 @@
 
 import math
 import numpy as np
-import torch.multiprocessing
+import multiprocessing
 import os
 from pathlib import Path
 import sys

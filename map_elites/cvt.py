@@ -39,7 +39,7 @@
 
 import math
 import numpy as np
-import torch.multiprocessing as multiprocessing
+import multiprocessing
 import os
 
 # from scipy.spatial import cKDTree : TODO -- faster?
