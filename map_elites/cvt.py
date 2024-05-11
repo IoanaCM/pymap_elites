@@ -39,7 +39,7 @@
 
 import math
 import numpy as np
-import torch.multiprocessing as multiprocessing
+import torch.multiprocessing as mp
 import os
 
 # from scipy.spatial import cKDTree : TODO -- faster?
@@ -66,10 +66,10 @@ def __add_to_archive(s, centroid, archive, kdt):
 
 # evaluate a single vector (x) with a function f and return a species
 # t = vector, function
-def __evaluate(t):
-    z, f = t  # evaluate z with function f
+def __evaluate(i,l):
+    z, f = l[i]  # evaluate z with function f
     fit, desc = f(z)
-    return cm.Species(z, desc, fit)
+    l[i] = cm.Species(z, desc, fit)
 
 # map-elites algorithm (CVT variant)
 def compute(dim_map, dim_x, f,
@@ -86,7 +86,8 @@ def compute(dim_map, dim_x, f,
 
     """
     # setup the parallel processing pool
-    pool = multiprocessing.Pool(min(params['batch_size'], 100))
+    # pool = multiprocessing.Pool(min(params['batch_size'], 100))
+    manager = mp.Manager()
     
     # create log folder
     if log_dir is not None:
@@ -133,7 +134,7 @@ def compute(dim_map, dim_x, f,
                 z = variation_operator(x.x, y.x, params)
                 to_evaluate += [(z, f)]
         # evaluation of the fitness for to_evaluate
-        s_list = cm.parallel_eval(__evaluate, to_evaluate, pool, params)
+        s_list = cm.parallel_eval(__evaluate, to_evaluate, manager, params)
         log_file.write(f'Finished eval\n')
         # natural selection
         log_file.write(f'Adding to archive {len(s_list)}\n')
