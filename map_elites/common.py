@@ -215,6 +215,7 @@ def parallel_eval(evaluate_function, to_evaluate, manager, params):
             processes.append(p)
         for p in processes:
             p.join()
+            p.close()
         s_list = l
         # s_list = pool.map(evaluate_function, to_evaluate)
     else:
