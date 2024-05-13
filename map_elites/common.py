@@ -45,6 +45,7 @@ import os
 from pathlib import Path
 import sys
 import random
+import time
 from collections import defaultdict
 from sklearn.cluster import KMeans
 
@@ -208,10 +209,13 @@ def make_hashable(array):
 def parallel_eval(evaluate_function, to_evaluate, params):
     if params['parallel'] == True:
         # setup the parallel processing pool
+        time.sleep(30)
         pool = mp.Pool(min(params['batch_size'], 100))
+        time.sleep(30)
         s_list = pool.map(evaluate_function, to_evaluate)
         pool.close()
         pool.join()
+        time.sleep(30)
     else:
         s_list = map(evaluate_function, to_evaluate)
     return list(s_list)
