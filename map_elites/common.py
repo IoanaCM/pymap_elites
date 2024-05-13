@@ -205,19 +205,13 @@ def make_hashable(array):
     return tuple(map(float, array))
 
 
-def parallel_eval(evaluate_function, to_evaluate, manager, params):
+def parallel_eval(evaluate_function, to_evaluate, params):
     if params['parallel'] == True:
-        processes = []
-        l = manager.list(to_evaluate)
-        for i in range(len(to_evaluate)):
-            p = mp.Process(target=evaluate_function, args=(i,l,))
-            p.start()
-            processes.append(p)
-        for p in processes:
-            p.join()
-            p.close()
-        s_list = l
-        # s_list = pool.map(evaluate_function, to_evaluate)
+        # setup the parallel processing pool
+        pool = mp.Pool(min(params['batch_size'], 100))
+        s_list = pool.map(evaluate_function, to_evaluate)
+        pool.close()
+        pool.join()
     else:
         s_list = map(evaluate_function, to_evaluate)
     return list(s_list)

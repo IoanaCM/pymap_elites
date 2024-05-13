@@ -66,10 +66,10 @@ def __add_to_archive(s, centroid, archive, kdt):
 
 # evaluate a single vector (x) with a function f and return a species
 # t = vector, function
-def __evaluate(i,l):
-    z, f = l[i]  # evaluate z with function f
+def __evaluate(x):
+    z, f = x  # evaluate z with function f
     fit, desc = f(z)
-    l[i] = cm.Species(z, desc, fit)
+    return cm.Species(z, desc, fit)
 
 # map-elites algorithm (CVT variant)
 def compute(dim_map, dim_x, f,
@@ -85,9 +85,6 @@ def compute(dim_map, dim_x, f,
        Format of the logfile: evals archive_size max mean median 5%_percentile, 95%_percentile
 
     """
-    # setup the parallel processing pool
-    # pool = multiprocessing.Pool(min(params['batch_size'], 100))
-    manager = mp.Manager()
     
     # create log folder
     if log_dir is not None:
@@ -134,7 +131,7 @@ def compute(dim_map, dim_x, f,
                 z = variation_operator(x.x, y.x, params)
                 to_evaluate += [(z, f)]
         # evaluation of the fitness for to_evaluate
-        s_list = cm.parallel_eval(__evaluate, to_evaluate, manager, params)
+        s_list = cm.parallel_eval(__evaluate, to_evaluate, params)
         log_file.write(f'Finished eval\n')
         # natural selection
         log_file.write(f'Adding to archive {len(s_list)}\n')
