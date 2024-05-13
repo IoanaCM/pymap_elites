@@ -136,7 +136,7 @@ def compute(dim_map, dim_x, f,
         s_list = cm.parallel_eval(__evaluate, to_evaluate, params)
         log_file.write(f'Finished eval\n')
         # natural selection
-        log_file.write(f'Adding to archive {len(s_list)}\n')
+        log_file.write(f'Adding to archive {len(s_list)} solutions: {s_list}\n')
         for s in s_list:
             if s.desc is not None and s.fitness is not None:
                 __add_to_archive(s, s.desc, archive, kdt)
