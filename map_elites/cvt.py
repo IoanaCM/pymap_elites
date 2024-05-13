@@ -153,8 +153,8 @@ def compute(dim_map, dim_x, f,
         if log_file != None:
             fit_list = np.array([x.fitness for x in archive.values()])
             log_file.write("{} {} {} {} {} {} {}\n".format(n_evals, len(archive.keys()),
-                    fit_list.max(), np.mean(fit_list), np.median(fit_list),
-                    np.percentile(fit_list, 5), np.percentile(fit_list, 95)))
+                    fit_list.max(axis=0), np.mean(fit_list,axis=0), np.median(fit_list,axis=0),
+                    np.percentile(fit_list, 5,axis=0), np.percentile(fit_list, 95,axis=0)))
             log_file.flush()
     cm.__save_archive(archive, n_evals, log_dir)
     return archive
