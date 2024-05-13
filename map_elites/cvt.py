@@ -54,9 +54,10 @@ def __add_to_archive(s, centroid, archive, kdt):
     niche = kdt.data[niche_index]
     n = cm.make_hashable(niche)
     s.centroid = n
-    scalar = len(s.fitness.shape) <= 1
     if n in archive:
-        if scalar and s.fitness > archive[n].fitness or not scalar and s.fitness[0] > archive[n].fitness[0]:
+        scalar = np.isscalar(s.fitness)
+        comp = s.fitness > archive[n].fitness
+        if scalar and comp or not scalar and comp[0]:
             archive[n] = s
             return 1
         return 0
