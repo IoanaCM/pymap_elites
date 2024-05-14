@@ -55,12 +55,13 @@ default_params = \
         "cvt_samples": 25000,
         # we evaluate in batches to paralleliez
         "batch_size": 20,
+        "pool_size": 5,
         # proportion of niches to be filled before starting
         "random_init": 0.01,
         # batch for random initialization
         "random_init_batch": 20,
         # when to write results (one generation = one batch)
-        "dump_period": 20,
+        "dump_period": 50,
         # do we use several cores?
         "parallel": True,
         # do we cache the result of CVT and reuse?
@@ -209,13 +210,13 @@ def make_hashable(array):
 def parallel_eval(evaluate_function, to_evaluate, params):
     if params['parallel'] == True:
         # setup the parallel processing pool
-        time.sleep(30)
-        pool = mp.Pool(min(params['batch_size'], 100))
-        time.sleep(30)
+        # time.sleep(30)
+        pool = mp.Pool(min(params['pool_size'], 50))
+        # time.sleep(30)
         s_list = pool.map(evaluate_function, to_evaluate)
         pool.close()
         pool.join()
-        time.sleep(30)
+        # time.sleep(30)
     else:
         s_list = map(evaluate_function, to_evaluate)
     return list(s_list)
