@@ -69,6 +69,7 @@ def __add_to_archive(s, centroid, archive, kdt):
 # evaluate a single vector (x) with a function f and return a species
 # t = vector, function
 def __evaluate(x):
+    print(x)
     z, f = x  # evaluate z with function f
     fit, desc = f(z)
     return cm.Species(z, desc, fit)
@@ -87,7 +88,7 @@ def compute(dim_map, dim_x, f,
        Format of the logfile: evals archive_size max mean median 5%_percentile, 95%_percentile
 
     """
-    
+    print(params)
     # create log folder
     if log_dir is not None:
         os.makedirs(log_dir, exist_ok=True)

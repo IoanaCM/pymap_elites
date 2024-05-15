@@ -40,9 +40,11 @@
 
 import math
 import numpy as np
-import torch.multiprocessing as mp
+# import torch.multiprocessing as mp
+from torch.distributed.elastic.multiprocessing import Std, start_processes
 import os
 from pathlib import Path
+import copy
 import sys
 import random
 import time
@@ -56,6 +58,7 @@ default_params = \
         # we evaluate in batches to paralleliez
         "batch_size": 20,
         "pool_size": 5,
+        "log_dir": 'mp',
         # proportion of niches to be filled before starting
         "random_init": 0.01,
         # batch for random initialization
@@ -209,14 +212,34 @@ def make_hashable(array):
 
 def parallel_eval(evaluate_function, to_evaluate, params):
     if params['parallel'] == True:
-        # setup the parallel processing pool
-        # time.sleep(30)
-        pool = mp.Pool(min(params['pool_size'], 50))
-        # time.sleep(30)
-        s_list = pool.map(evaluate_function, to_evaluate)
-        pool.close()
-        pool.join()
-        # time.sleep(30)
+        # # setup the parallel processing pool
+        # # time.sleep(30)
+        # pool = mp.Pool(min(params['pool_size'], 50))
+        # # time.sleep(30)
+        # s_list = pool.map(evaluate_function, to_evaluate)
+        # pool.close()
+        # pool.join()
+        # # time.sleep(30)
+        
+        p = params['log_dir']
+        print(f'Parallel eval log dir: {p}\n')
+        os.makedirs(params['log_dir'], exist_ok=True)
+        ctx = start_processes(
+                name="parallel-eval",
+                entrypoint=evaluate_function,
+                args={i: ev for (i, ev) in enumerate(to_evaluate)},
+                envs={i: {} for i in range(len(to_evaluate))},
+                log_dir=params["log_dir"],
+                redirects=Std.ALL, # write all worker stdout/stderr to a log file
+            )
+
+        # waits for all copies of trainer to finish
+        res = ctx.wait()
+        s_list = [(None,None)]*len(to_evaluate)
+        print(res)
+        for (i, r) in res.return_values.items():
+            s_list[i] = r
+        ctx.close()
     else:
         s_list = map(evaluate_function, to_evaluate)
     return list(s_list)
