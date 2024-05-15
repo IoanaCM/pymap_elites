@@ -40,7 +40,7 @@
 
 import math
 import numpy as np
-import torch.multiprocessing as mp
+import multiprocessing as mp
 import os
 from pathlib import Path
 import sys
@@ -207,15 +207,15 @@ def make_hashable(array):
     return tuple(map(float, array))
 
 
-def parallel_eval(evaluate_function, to_evaluate, params):
+def parallel_eval(evaluate_function, to_evaluate, pool, params):
     if params['parallel'] == True:
         # setup the parallel processing pool
         # time.sleep(30)
-        pool = mp.Pool(min(params['pool_size'], 50))
+        # pool = mp.Pool(min(params['pool_size'], 50))
         # time.sleep(30)
         s_list = pool.map(evaluate_function, to_evaluate)
-        pool.close()
-        pool.join()
+        # pool.close()
+        # pool.join()
         # time.sleep(30)
     else:
         s_list = map(evaluate_function, to_evaluate)

@@ -39,7 +39,7 @@
 
 import math
 import numpy as np
-import torch.multiprocessing as mp
+import multiprocessing as mp
 import os
 
 # from scipy.spatial import cKDTree : TODO -- faster?
@@ -94,6 +94,9 @@ def compute(dim_map, dim_x, f,
         log_file = os.path.join(log_dir, log_file)
     
     log_file = open(log_file, 'w')
+    
+    num_cores = mp.cpu_count()
+    pool = mp.Pool(num_cores)
 
     # create the CVT
     c = cm.cvt(n_niches, dim_map,
@@ -133,7 +136,7 @@ def compute(dim_map, dim_x, f,
                 z = variation_operator(x.x, y.x, params)
                 to_evaluate += [(z, f)]
         # evaluation of the fitness for to_evaluate
-        s_list = cm.parallel_eval(__evaluate, to_evaluate, params)
+        s_list = cm.parallel_eval(__evaluate, to_evaluate, pool, params)
         log_file.write(f'Finished eval\n')
         # natural selection
         log_file.write(f'Adding to archive {len(s_list)} solutions: {[(s.desc, s.fitness) for s in s_list]}\n')
