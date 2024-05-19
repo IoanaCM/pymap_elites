@@ -40,16 +40,16 @@ def customize_axis(ax):
     ax.set_axisbelow(True)
     ax.grid(axis='y', color="0.9", linestyle='--', linewidth=1)
 
-fig = figure(frameon=False) # no frame
+# fig = figure(frameon=False) # no frame
 
 
 #plt.box(False)
 #plt.ticklabel_format(axis='both', style='sci', scilimits=(-2,2))
 
-
-ax1 = fig.add_subplot(311)
-ax2 = fig.add_subplot(312)
-ax3 = fig.add_subplot(313)
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
+# ax1 = fig.add_subplot(311)
+# ax2 = fig.add_subplot(312)
+# ax3 = fig.add_subplot(313)
 ax3.grid(axis='y', color="0.9", linestyle='--', linewidth=1)
 
 k = 0
@@ -80,7 +80,9 @@ customize_axis(ax2)
 ax3.set_title('Max fitness')
 customize_axis(ax3)
 
-legend = ax1.legend(loc=4)#bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=(3))
+# legend = ax1.legend(loc='upper center',  # Adjust location for aesthetics (optional)
+#                     bbox_to_anchor=(0.5, 1.02))  # Anchor at center of top (x=0.5, y=1.02)
+legend = ax2.legend(bbox_to_anchor=(0.1, 1.1, 1., .102), loc=3, ncol=(3))
 frame = legend.get_frame()
 frame.set_facecolor('0.9')
 frame.set_edgecolor('1.0')
