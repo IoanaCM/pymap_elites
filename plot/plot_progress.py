@@ -87,4 +87,4 @@ frame.set_edgecolor('1.0')
 
 fig.tight_layout()
 fig.savefig('progress.pdf')
-fig.savefig('progress.svg')
+fig.savefig('progress.png')
