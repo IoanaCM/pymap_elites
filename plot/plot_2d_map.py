@@ -136,8 +136,8 @@ def load_data(filename, dim,dim_x):
     print("Loading ",filename)
     data = np.loadtxt(filename)
     fit = data[:, 0:1]
-    desc = data[:,1: dim+1]
-    x = data[:,dim+1:dim+1+dim_x]
+    desc = data[:,3: dim+3]
+    x = data[:,dim+3:dim+3+dim_x]
 
     return fit, desc, x
 
@@ -205,6 +205,6 @@ if __name__ == "__main__":
     axes.set_ylim(0, 1)
     sc = plot_cvt(axes, centroids, fit, beh, x,2,4, min_fit, max_fit)
     fig.colorbar(sc)
-    fig.suptitle(f'150-Crossover with Flip - Max fit: {max_fit[0]} - Min fit: {min_fit[0]}', fontsize=20)
+    fig.suptitle(f'Flip - Max fit: {max_fit[0]} - Min fit: {min_fit[0]}', fontsize=20)
     fig.savefig('cvt.pdf')
     fig.savefig('cvt.png')

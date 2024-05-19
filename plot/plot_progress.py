@@ -3,6 +3,7 @@ from pylab import *
 import brewer2mpl
 import numpy as np
 import sys
+import re
 import math
 import gzip
 import matplotlib.gridspec as gridspec
@@ -47,35 +48,36 @@ fig = figure(frameon=False) # no frame
 
 
 ax1 = fig.add_subplot(311)
-
-k = 0
-for i in sys.argv[1:]:
-    data = np.loadtxt(i)
-    ax1.plot(data[:,0], data[:, 1], '-', linewidth=2, color=colors[k], label=i)
-    k += 1
-ax1.set_title('Coverage')
-customize_axis(ax1)
-
 ax2 = fig.add_subplot(312)
-k = 0
-for i in sys.argv[1:]:
-    data = np.loadtxt(i)
-    ax2.plot(data[:,0], data[:, 3], '-', linewidth=2, color=colors[k], label=i)
-    k += 1
-ax2.set_title('Mean fitness')
-
-customize_axis(ax2)
-
-
 ax3 = fig.add_subplot(313)
 ax3.grid(axis='y', color="0.9", linestyle='--', linewidth=1)
-k = 0
-for i in sys.argv[1:]:
-    data = np.loadtxt(i)
-    ax3.plot(data[:,0], data[:, 2], '-', linewidth=2, color=colors[k], label=i)
-    k += 1
-ax3.set_title('Max fitness')
 
+k = 0
+for fil in sys.argv[1:]:
+    with open(fil) as i:
+        evals, centroids, mean_fits, max_fits = [], [], [], []
+        for line in i:
+            if re.match(r"^\d+.*$",line):
+                line = line.replace('[','')
+                line = line.replace(']','')
+                vals = line.split()
+                evals.append(int(vals[0]))
+                centroids.append(int(vals[1])/1000)
+                max_fits.append(float(vals[2]))
+                mean_fits.append(float(vals[5]))
+
+    n = fil.split('/')[-1]
+    n = n.replace('_cpu_meta-loop.dat','')[2:]
+    ax1.plot(evals, centroids, '-', linewidth=2, color=colors[k], label=n)
+    ax2.plot(evals, mean_fits, '-', linewidth=2, color=colors[k], label=n)
+    ax3.plot(evals, max_fits, '-', linewidth=2, color=colors[k], label=n)
+    k += 1
+
+ax1.set_title('Coverage')
+customize_axis(ax1)
+ax2.set_title('Mean fitness')
+customize_axis(ax2)
+ax3.set_title('Max fitness')
 customize_axis(ax3)
 
 legend = ax1.legend(loc=4)#bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=(3))
