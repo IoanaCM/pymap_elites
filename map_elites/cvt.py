@@ -95,7 +95,7 @@ def compute(dim_map, dim_x, f,
     
     log_file = open(log_file, 'w')
     
-    num_cores = params.get('batch_size', mp.cpu_count())
+    num_cores = params.get('pool_size', mp.cpu_count())
     print(f'Num Cores - {num_cores}')
     pool = mp.Pool(num_cores)
 
