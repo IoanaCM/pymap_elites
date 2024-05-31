@@ -39,6 +39,8 @@
 
 import math
 import numpy as np
+import torch
+import torch.multiprocessing as mpt
 import multiprocessing as mp
 import os
 
@@ -95,9 +97,15 @@ def compute(dim_map, dim_x, f,
     
     log_file = open(log_file, 'w')
     
-    num_cores = params.get('pool_size', mp.cpu_count())
-    print(f'Num Cores - {num_cores}')
-    pool = mp.Pool(num_cores)
+    pool_size = params.get('pool_size', mp.cpu_count())
+    print(f'Num Cores - {pool_size}')
+    
+    pool = None
+    if params.gpu:
+        print('Using gpu')
+        pool = mpt.Pool(pool_size)
+    else:
+        pool = mp.Pool(pool_size)
 
     # create the CVT
     c = cm.cvt(n_niches, dim_map,
