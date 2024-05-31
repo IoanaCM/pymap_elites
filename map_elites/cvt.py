@@ -101,7 +101,7 @@ def compute(dim_map, dim_x, f,
     print(f'Num Cores - {pool_size}')
     
     pool = None
-    if params.gpu:
+    if params.get('gpu', False):
         print('Using gpu')
         pool = mpt.Pool(pool_size)
     else:
