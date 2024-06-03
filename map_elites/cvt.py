@@ -134,9 +134,15 @@ def compute(dim_map, dim_x, f,
             keys = list(archive.keys())
             log_file.write(f'Keys: {keys}\n')
             log_file.flush()
+            fits = np.array([archive[k].fitness[0] for k in keys])
+            min_fit = np.min(fits)
+            to_add = 0 if min_fit > 0 else (1 - min_fit)
+            fits = np.array([x + to_add for x in fits])
+            tot_fit = np.sum(fits)
+            fits = fits / tot_fit
             # we select all the parents at the same time because randint is slow
-            rand1 = np.random.randint(len(keys), size=params['batch_size'])
-            rand2 = np.random.randint(len(keys), size=params['batch_size'])
+            rand1 = np.random.choice(range(len(keys)), size=params['batch_size'], p=fits)
+            rand2 = np.random.choice(range(len(keys)), size=params['batch_size'], p=fits)
             for n in range(0, params['batch_size']):
                 # parent selection
                 x = archive[keys[rand1[n]]]
