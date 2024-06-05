@@ -49,7 +49,8 @@ from sklearn.neighbors import KDTree
 
 from . import common as cm
 
-
+def softmax(x):
+    return np.exp(x) / np.exp(x).sum(axis=0)
 
 def __add_to_archive(s, centroid, archive, kdt):
     niche_index = kdt.query([centroid], k=1)[1][0][0]
@@ -60,12 +61,13 @@ def __add_to_archive(s, centroid, archive, kdt):
         scalar = np.isscalar(s.fitness)
         comp = s.fitness > archive[n].fitness
         if scalar and comp or not scalar and comp[0]:
+            old = archive[n]
             archive[n] = s
-            return 1
-        return 0
+            return 1, old
+        return 0, None
     else:
         archive[n] = s
-        return 1
+        return 1, None
 
 
 # evaluate a single vector (x) with a function f and return a species
@@ -116,6 +118,8 @@ def compute(dim_map, dim_x, f,
     archive = {} # init archive (empty)
     n_evals = 0 # number of evaluations since the beginning
     b_evals = 0 # number evaluation since the last dump
+    demo_freqs = np.zeros((dim_x), dtype=int)
+    demo_fits = np.zeros((dim_x), dtype=float)
 
     # main loop
     while (n_evals < max_evals):
@@ -134,15 +138,30 @@ def compute(dim_map, dim_x, f,
             keys = list(archive.keys())
             log_file.write(f'Keys: {keys}\n')
             log_file.flush()
-            fits = np.array([archive[k].fitness[0] for k in keys])
-            min_fit = np.min(fits)
-            to_add = 0 if min_fit > 0 else (1 - min_fit)
-            fits = np.array([x + to_add for x in fits])
-            tot_fit = np.sum(fits)
-            fits = fits / tot_fit
+            scores = None
+            selection = params.get('selection','weighted')
+            print(f'Selection - {selection}')
+            
+            if selection == 'fitness':
+                fits = np.array([archive[k].fitness[0] for k in keys])
+                min_fit = np.min(fits)
+                to_add = 0 if min_fit > 0 else (1 - min_fit)
+                fits = np.array([x + to_add for x in fits])
+                tot_fit = np.sum(fits)
+                fits = fits / tot_fit
+                scores = fits
+            elif selection == 'random':
+                scores = None
+            elif selection == 'archive':
+                freq_scores = np.array([np.mean(demo_fits[archive[k].x]/demo_freqs[archive[k].x]) for k in keys])
+                freq_scores = softmax(freq_scores)
+                scores = freq_scores
+            else:
+                raise ValueError('Unknown selector provided - options are random, fitness, archive')
+
             # we select all the parents at the same time because randint is slow
-            rand1 = np.random.choice(range(len(keys)), size=params['batch_size'], p=fits)
-            rand2 = np.random.choice(range(len(keys)), size=params['batch_size'], p=fits)
+            rand1 = np.random.choice(range(len(keys)), size=params['batch_size'], p=scores)
+            rand2 = np.random.choice(range(len(keys)), size=params['batch_size'], p=scores)
             for n in range(0, params['batch_size']):
                 # parent selection
                 x = archive[keys[rand1[n]]]
@@ -157,7 +176,14 @@ def compute(dim_map, dim_x, f,
         log_file.write(f'Adding to archive {len(s_list)} solutions: {[(s.desc, s.fitness) for s in s_list]}\n')
         for s in s_list:
             if s.desc is not None and s.fitness is not None:
-                __add_to_archive(s, s.desc, archive, kdt)
+                succ, old =  __add_to_archive(s, s.desc, archive, kdt)
+                if succ:
+                    if old is not None:
+                        demo_fits -= old.x * old.fitness[0]
+                        demo_freqs -= old.x
+                    demo_fits += s.x * s.fitness[0]
+                    demo_freqs += s.x
+                    
         # count evals
         n_evals += len(to_evaluate)
         b_evals += len(to_evaluate)
