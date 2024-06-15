@@ -9,6 +9,7 @@ import gzip
 import matplotlib.gridspec as gridspec
 from PIL import Image
 
+import os
 from collections import defaultdict
 from matplotlib import pyplot as plt
 
@@ -32,7 +33,6 @@ def customize_axis(ax):
     ax.spines['left'].set_visible(False)
     ax.get_xaxis().tick_bottom()
     ax.tick_params(axis='y', length=0)
-    #ax.get_yaxis().tick_left()
 
     # offset the spines
     for spine in ax.spines.values():
@@ -41,20 +41,18 @@ def customize_axis(ax):
     ax.set_axisbelow(True)
     ax.grid(axis='y', color="0.9", linestyle='--', linewidth=1)
 
-# fig = figure(frameon=False) # no frame
-
-
-#plt.box(False)
-#plt.ticklabel_format(axis='both', style='sci', scilimits=(-2,2))
-
-fig, (ax1, ax2, ax3) = plt.subplots(3, 3, figsize=(18, 18))
-# ax1 = fig.add_subplot(311)
-# ax2 = fig.add_subplot(312)
-# ax3 = fig.add_subplot(313)
+fig, (ax1, ax2, ax3) = plt.subplots(3, 3, figsize=(18, 20))
 ax3[0].grid(axis='y', color="0.9", linestyle='--', linewidth=1)
 
-k = 0
-for fil in sys.argv[1:]:
+idx_file = [os.path.join(sys.argv[1], name)
+            for _, _, files in os.walk(sys.argv[1])
+            for name in files
+            if 'meta-loop' in name
+        ]
+
+min_len = None
+all_evals, all_centroids, all_mean_fits, all_max_fits, all_mean_succs, all_mean_hors, all_max_succs, all_max_hors = [], [], [], [], [], [], [], []
+for fil in idx_file:
     with open(fil) as i:
         evals, centroids, mean_fits, max_fits, mean_succs, mean_hors, max_succs, max_hors = [], [], [], [], [], [], [], []
         for line in i:
@@ -70,45 +68,86 @@ for fil in sys.argv[1:]:
                 mean_fits.append(float(vals[5]))
                 mean_succs.append(float(vals[6]))
                 mean_hors.append(-float(vals[7]))
+        
+        min_len = len(evals) if min_len is None else min(min_len, len(evals))
+        all_evals.append(evals)
+        all_centroids.append(centroids)
+        all_max_fits.append(max_fits)
+        all_max_succs.append(max_succs)
+        all_max_hors.append(max_hors)
+        all_mean_fits.append(mean_fits)
+        all_mean_succs.append(mean_succs)
+        all_mean_hors.append(mean_hors)
 
-    n = fil.split('/')[-1]
-    n = n.replace('_cpu_meta-loop.dat','')[2:]
-    ax1[1].plot(evals, centroids, '-', linewidth=2, color=colors[k], label=n)
-    ax2[0].plot(evals, mean_fits, '-', linewidth=2, color=colors[k], label=n)
-    ax3[0].plot(evals, max_fits, '-', linewidth=2, color=colors[k], label=n)
-    ax2[1].plot(evals, mean_succs, '-', linewidth=2, color=colors[k], label=n)
-    ax3[1].plot(evals, max_succs, '-', linewidth=2, color=colors[k], label=n)
-    ax2[2].plot(evals, mean_hors, '-', linewidth=2, color=colors[k], label=n)
-    ax3[2].plot(evals, max_hors, '-', linewidth=2, color=colors[k], label=n)
-    k += 1
+all_evals = np.array([evals[:min_len] for evals in all_evals])
+all_centroids = np.array([centroids[:min_len] for centroids in all_centroids])
+all_max_fits = np.array([fits[:min_len] for fits in all_max_fits])
+all_max_succs = np.array([succs[:min_len] for succs in all_max_succs])
+all_max_hors = np.array([hors[:min_len] for hors in all_max_hors])  
+all_mean_fits = np.array([fits[:min_len] for fits in all_mean_fits])
+all_mean_succs = np.array([succs[:min_len] for succs in all_mean_succs])
+all_mean_hors = np.array([hors[:min_len] for hors in all_mean_hors])  
 
-img = np.asarray(Image.open('./image.png'))
-ax1[0].imshow(img)
+all_centroids = np.array(all_centroids)
+means = np.mean(all_centroids, axis=0)
+stds = np.std(all_centroids, axis=0)
+ax1[1].plot(all_evals[0], means, linestyle='-')
+ax1[1].fill_between(all_evals[0], means + stds, means - stds, alpha=0.2, color='b')
+
+axes_names = [ax2, ax3]
+for i, metric in enumerate([all_mean_fits, all_mean_succs, all_mean_hors, all_max_fits, all_max_succs, all_max_hors]):
+    metric = np.array(metric)
+    means = np.mean(metric, axis=0)
+    stds = np.std(metric, axis=0)
+
+    axes_names[int(i/3)][int(i%3)].plot(all_evals[0], means, linestyle='-',)
+    axes_names[int(i/3)][int(i%3)].fill_between(all_evals[0], means + stds, means - stds, alpha=0.2, color='b')
+
+    if i%3 == 0:
+        axes_names[int(i/3)][int(i%3)].axhline(y = 31.29, color = 'r', linestyle = '--', label='full baseline') 
+        axes_names[int(i/3)][int(i%3)].axhline(y = 75.51, color = 'b', linestyle = '--', label='better baseline')
+        axes_names[int(i/3)][int(i%3)].axhline(y = 29.6, color = 'g', linestyle = '-.', label='worse baseline') 
+        axes_names[int(i/3)][int(i%3)].axhline(y = 25.68, color = 'b', linestyle = '-.', label='okay-worse baseline') 
+        axes_names[int(i/3)][int(i%3)].set_yticks(np.sort([31.29, 75.51, 25.68, np.max(metric), np.min(metric)]))
+    
+    elif i%3 == 1:
+        axes_names[int(i/3)][int(i%3)].axhline(y = .64, color = 'r', linestyle = '--', label='full baseline') 
+        axes_names[int(i/3)][int(i%3)].axhline(y = .91, color = 'b', linestyle = '--', label='better baseline')
+        axes_names[int(i/3)][int(i%3)].axhline(y = .30, color = 'g', linestyle = '-.', label='worse baseline') 
+        axes_names[int(i/3)][int(i%3)].axhline(y = .61, color = 'b', linestyle = '-.', label='okay-worse baseline')
+        axes_names[int(i/3)][int(i%3)].set_yticks(np.sort([.64, .91, .30, .61, np.max(metric), np.min(metric)]))
+    
+    else:
+        axes_names[int(i/3)][int(i%3)].axhline(y = 130, color = 'r', linestyle = '--', label='full baseline') 
+        axes_names[int(i/3)][int(i%3)].axhline(y = 77, color = 'b', linestyle = '--', label='better baseline')
+        axes_names[int(i/3)][int(i%3)].axhline(y = 149, color = 'g', linestyle = '-.', label='worse baseline') 
+        axes_names[int(i/3)][int(i%3)].axhline(y = 140, color = 'b', linestyle = '-.', label='okay-worse baseline')
+        axes_names[int(i/3)][int(i%3)].set_yticks(np.sort([130, 77, 149, 140, np.max(metric), np.min(metric)]))
+
+# img = np.asarray(Image.open('./image.png'))
+# ax1[0].imshow(img, interpolation='nearest', extent=[ -2, 2, -3, 3])
 ax1[0].set_axis_off()
 ax1[2].set_axis_off()
-ax1[1].set_title('Coverage')
+ax1[1].set_title('Coverage', fontsize=20)
 customize_axis(ax1[1])
-ax2[0].set_title('Mean fitness')
+ax2[0].set_title('Mean fitness', fontsize=20)
 customize_axis(ax2[0])
-ax3[0].set_title('Max fitness')
+ax3[0].set_title('Max fitness', fontsize=20)
 customize_axis(ax3[0])
-ax2[1].set_title('Mean success')
+ax2[1].set_title('Mean success', fontsize=20)
 customize_axis(ax2[1])
-ax3[1].set_title('Max success')
+ax3[1].set_title('Max success', fontsize=20)
 customize_axis(ax3[1])
-ax2[2].set_title('Mean horizon')
+ax2[2].set_title('Mean horizon', fontsize=20)
 customize_axis(ax2[2])
-ax3[2].set_title('Min horizon')
+ax3[2].set_title('Min horizon', fontsize=20)
 customize_axis(ax3[2])
 
-# legend = ax1.legend(loc='upper center',  # Adjust location for aesthetics (optional)
-#                     bbox_to_anchor=(0.5, 1.02))  # Anchor at center of top (x=0.5, y=1.02)
-# legend = ax1[0].legend(bbox_to_anchor=(0.1, 1.1, 1., .102), ncol=(1))
 # legend = ax1[1].legend(bbox_to_anchor=(0.1, 0.1, 1., 1.102), ncol=(1), fontsize=20)
 # frame = legend.get_frame()
 # frame.set_facecolor('0.9')
 # frame.set_edgecolor('1.0')
 
 fig.tight_layout()
-fig.savefig('progress.pdf')
+fig.subplots_adjust(wspace=.35, hspace=.35)
 fig.savefig('progress.png')
