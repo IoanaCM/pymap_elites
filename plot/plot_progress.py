@@ -1,4 +1,12 @@
-'''Adapted from original plot/plot_progress.py to plot mean and std over multiple runs'''
+'''Adapted from original plot/plot_progress.py to plot mean and std over multiple runs
+
+How to run:
+```python3 plot_progress.py --data_dir [dirs of data to plot] --[no-]baseline```
+
+args:
+    data-dir - source of data to be analysed
+    baseline/no-baseline - whether to plot baselines or not
+'''
 
 import argparse
 import glob
