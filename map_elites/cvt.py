@@ -1,4 +1,12 @@
 #! /usr/bin/env python
+
+'''Adapted from original map_elites/cvt.py. Features added:
+ * gpu multiprocessing
+ * several selection operators (random, weighted, custom)
+ * custom initalisation for the random init phase
+
+'''
+
 #| This file is a part of the pymap_elites framework.
 #| Copyright 2019, INRIA
 #| Main contributor(s):
